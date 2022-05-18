@@ -1,0 +1,45 @@
+﻿version: '3.9'
+
+services:
+  keycloakpoc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - Jwt__Authority=http://keycloak:8080/auth/realms/master
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - keycloak
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:15.0.2
+    container_name: keycloak
+    restart: always
+    ports:
+      - 8080:8080
+      - 9990:9990
+    environment:
+      DB_VENDOR: mssql
+      DB_ADDR: keycloak_db
+      DB_DATABASE: Keycloak
+      DB_USER: sa
+      DB_PASSWORD: "@docker@2021"
+      # KEYCLOAK_USER: admin
+      # KEYCLOAK_PASSWORD: admin
+    depends_on: 
+      - keycloak_db
+  
+  keycloak_db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: keycloak-db
+    restart: always
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./.docker/data:/var/opt/mssql/data
+    environment:
+      SA_PASSWORD: "@docker@2021"
+      ACCEPT_EULA: "Y"
