@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloakpoc-namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: keycloakpoc-namespace
+  name: keycloak-poc
+  labels:
+    app: keycloakpoc
+    tier: app
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      app: keycloakpoc
+      tier: app
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: keycloakpoc
+        tier: app
+        version: v1
+    spec:
+      containers:
+        - name: keycloakpoc
+          image: keycloakpoc
+          ports:
+            - name: http 
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: keycloakpoc-namespace
+  name: keycloak-poc-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: keycloak-poc
+    tier: app
+    version: v1

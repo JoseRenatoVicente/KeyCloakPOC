@@ -1,0 +1,14 @@
+﻿version: '3.9'
+
+services:
+  keycloakpoc:
+    image: ${DOCKER_REGISTRY-}keycloakpoc
+    build:
+      context: .
+      dockerfile: KeyCloakPOC/Dockerfile
+      
+  postgres:
+      image: postgres
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:legacy
